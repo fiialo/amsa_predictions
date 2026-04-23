@@ -124,23 +124,27 @@ After all 10,000 runs, per team:
 
 ---
 
-## 🔄 What Happens When You Refresh
+## 🔄 Data Refresh
 
-Each page load reruns all 10,000 simulations fresh using `Math.random()`. Here is what changes and what doesn't:
+When you refresh the page, the simulation reruns from scratch — all 10,000 Poisson simulations execute again in your browser. Here's exactly what happens:
 
-**Always identical (deterministic — based on real results):**
-- Current standings table
-- Team Poisson strength ratings (Attack / Defense)
-- All match results and form dots
-- Home/away splits, biggest win/loss, clean sheets
-- Expected goals (λ) shown on remaining fixtures
+**What stays the same every refresh:**
+- All played match results (hardcoded in the JS arrays)
+- Current standings — deterministic, always identical
+- Team strength ratings (Attack/Defense) — calculated from real results
+- Home/Away splits, biggest win/loss, clean sheets — all from real data
+- Form dots for all played games
 
-**Varies slightly between refreshes (±0.5–1%):**
-- Title %, Top 3 %, Relegation % probabilities
-- Median predicted points
-- Points range (p10–p90)
+**What varies slightly between refreshes:**
+- The 10,000 simulations use `Math.random()` for each remaining fixture, so the random seed differs every time
+- Title %, Relegation %, Top 3 %, Median pts, Points range — these will fluctuate by roughly ±0.5–1% each refresh
 
-Because 10,000 simulations are aggregated, the variance between refreshes is very small — typically less than 1 percentage point. The predicted table order and most likely positions are stable across refreshes. If you need fully reproducible results, a seeded pseudo-random number generator (PRNG) can be added to make the simulation 100% deterministic.
+However, because it's aggregated over 10,000 runs, the variance is very small. For example:
+- A team showing 42.3% title chance might show 41.8% or 42.7% on the next refresh
+- The most likely position for each team almost never changes between refreshes
+- Rankings in the predicted table are stable
+
+> **In short:** The predictions are statistically stable — refreshing gives you essentially the same answer every time, just with tiny random noise. If you want perfectly identical results on every refresh, a fixed random seed (seeded PRNG) can be added to make the simulation 100% deterministic — see the Customization section below.
 
 ---
 
