@@ -1,0 +1,735 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AMSA Premier Division — Poisson Predictor</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --pitch:#141f14;--white:#f5f5f0;--gray:#7a7a6a;--card:#1c281c;
+    --accent:#c8ff00;--gold:#f0c040;--red:#e05050;--orange:#ff8c42;--blue:#60a0e0;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{background:var(--pitch);color:var(--white);font-family:'DM Mono',monospace;font-size:15px;min-height:100vh;
+    background-image:repeating-linear-gradient(0deg,transparent,transparent 79px,rgba(200,255,0,0.025) 79px,rgba(200,255,0,0.025) 80px),repeating-linear-gradient(90deg,transparent,transparent 79px,rgba(200,255,0,0.025) 79px,rgba(200,255,0,0.025) 80px);}
+  header{border-bottom:2px solid var(--accent);padding:2rem 2.5rem 1.5rem;display:flex;align-items:flex-end;gap:1.5rem;flex-wrap:wrap;}
+  .badge{width:58px;height:58px;background:var(--accent);clip-path:polygon(50% 0%,100% 25%,100% 75%,50% 100%,0% 75%,0% 25%);display:flex;align-items:center;justify-content:center;font-size:1.6rem;flex-shrink:0;}
+  h1{font-family:'Bebas Neue',sans-serif;font-size:clamp(2.2rem,5vw,3.6rem);letter-spacing:0.04em;line-height:1;}
+  h1 span{color:var(--accent);}
+  .subtitle{font-size:0.82rem;color:var(--gray);letter-spacing:0.15em;text-transform:uppercase;margin-top:0.25rem;}
+  .method-badge{display:inline-flex;align-items:center;gap:0.5rem;background:rgba(200,255,0,0.1);border:1px solid rgba(200,255,0,0.3);border-radius:20px;padding:0.35rem 1rem;font-size:0.82rem;color:var(--accent);letter-spacing:0.08em;margin-top:0.5rem;}
+  .tabs{display:flex;padding:1.2rem 2.5rem 0;border-bottom:1px solid rgba(200,255,0,0.15);overflow-x:auto;}
+  .tab{padding:0.65rem 1.5rem;font-family:'Bebas Neue',sans-serif;font-size:1.1rem;letter-spacing:0.1em;color:var(--gray);cursor:pointer;border:none;border-bottom:2px solid transparent;background:none;transition:all 0.2s;white-space:nowrap;}
+  .tab.active{color:var(--accent);border-bottom-color:var(--accent);}
+  .tab:hover:not(.active){color:var(--white);}
+  .content{padding:2rem 2.5rem;}
+  .panel{display:none;}.panel.active{display:block;}
+  .sec{font-family:'Bebas Neue',sans-serif;font-size:1.55rem;letter-spacing:0.08em;color:var(--white);margin-bottom:1rem;display:flex;align-items:center;gap:0.75rem;}
+  .sec::after{content:'';flex:1;height:1px;background:rgba(200,255,0,0.15);}
+  .note{background:rgba(200,255,0,0.06);border-left:3px solid var(--accent);padding:1rem 1.1rem;font-size:0.88rem;color:var(--gray);margin-bottom:1.5rem;line-height:1.8;}
+  .note strong{color:var(--white);}
+  .note code{background:rgba(200,255,0,0.1);padding:0.1rem 0.35rem;border-radius:2px;color:var(--accent);font-size:0.84rem;}
+  .sb{display:inline-block;font-size:0.72rem;letter-spacing:0.1em;text-transform:uppercase;padding:0.2rem 0.5rem;border-radius:2px;margin-left:0.5rem;vertical-align:middle;}
+  .sb-f{background:rgba(240,192,64,0.2);color:var(--gold);}
+  .sb-s{background:rgba(200,255,0,0.15);color:var(--accent);}
+  .sb-p{background:rgba(255,140,66,0.2);color:var(--orange);}
+  .ow{overflow-x:auto;}
+
+  /* Tables */
+  table{width:100%;border-collapse:collapse;font-size:0.93rem;min-width:600px;}
+  th{font-family:'Bebas Neue',sans-serif;font-size:1rem;letter-spacing:0.1em;color:var(--accent);text-align:left;padding:0.6rem 0.85rem;border-bottom:1px solid rgba(200,255,0,0.25);}
+  td{padding:0.7rem 0.85rem;border-bottom:1px solid rgba(255,255,255,0.04);vertical-align:middle;}
+  tr:hover td{background:rgba(200,255,0,0.03);}
+  .pos{font-family:'Bebas Neue',sans-serif;font-size:1.3rem;color:var(--gray);width:32px;}
+  .p1 .pos{color:var(--gold);}.p2 .pos{color:#c0c0c0;}.p3 .pos{color:#cd7f32;}
+  .tname{font-weight:500;font-size:0.95rem;}
+  .ptsc{font-family:'Bebas Neue',sans-serif;font-size:1.5rem;color:var(--accent);text-align:center;}
+  .nc{text-align:center;color:var(--gray);}
+  .gdp{color:var(--accent);}.gdn{color:var(--red);}.gd0{color:var(--gray);}
+  .fd-row{display:flex;gap:4px;}
+  .fd{width:10px;height:10px;border-radius:50%;flex-shrink:0;}
+  .fW{background:var(--accent);}.fD{background:var(--gold);}.fL{background:var(--red);}
+  .legend{display:flex;gap:1.5rem;font-size:0.82rem;color:var(--gray);margin-bottom:1rem;flex-wrap:wrap;}
+  .li{display:flex;align-items:center;gap:0.4rem;}
+  .ld{width:10px;height:10px;border-radius:50%;}
+
+  /* Pred table */
+  .pred-table{width:100%;border-collapse:collapse;font-size:0.91rem;min-width:760px;}
+  .pred-table th{font-family:'Bebas Neue',sans-serif;font-size:0.98rem;letter-spacing:0.1em;color:var(--accent);text-align:left;padding:0.6rem 0.85rem;border-bottom:1px solid rgba(200,255,0,0.25);}
+  .pred-table td{padding:0.7rem 0.85rem;border-bottom:1px solid rgba(255,255,255,0.04);vertical-align:middle;}
+  .pred-table tr:hover td{background:rgba(200,255,0,0.03);}
+  .rel-zone td{background:rgba(224,80,80,0.05);}
+  .rel-zone:hover td{background:rgba(224,80,80,0.1)!important;}
+  .rel-label{font-size:0.72rem;color:var(--red);letter-spacing:0.08em;text-transform:uppercase;margin-left:0.4rem;}
+
+  /* Prob bar */
+  .pb-wrap{display:flex;align-items:center;gap:0.5rem;}
+  .pb-bg{height:7px;background:rgba(255,255,255,0.08);border-radius:3px;overflow:hidden;flex:1;min-width:80px;}
+  .pb-fill{height:100%;border-radius:3px;}
+  .pb-val{font-size:0.88rem;min-width:44px;text-align:right;font-weight:500;}
+
+  /* Poisson strength table */
+  .strength-table{width:100%;border-collapse:collapse;font-size:0.91rem;min-width:520px;}
+  .strength-table th{font-family:'Bebas Neue',sans-serif;font-size:0.98rem;letter-spacing:0.1em;color:var(--accent);padding:0.6rem 0.85rem;border-bottom:1px solid rgba(200,255,0,0.25);text-align:left;}
+  .strength-table td{padding:0.7rem 0.85rem;border-bottom:1px solid rgba(255,255,255,0.04);}
+  .atk-bar{height:6px;background:rgba(200,255,0,0.15);border-radius:2px;margin-top:4px;overflow:hidden;}
+  .atk-fill{height:100%;background:var(--accent);border-radius:2px;}
+  .def-bar{height:6px;background:rgba(224,80,80,0.15);border-radius:2px;margin-top:4px;overflow:hidden;}
+  .def-fill{height:100%;background:var(--red);border-radius:2px;}
+
+  /* Cards */
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:1.1rem;margin-top:0.5rem;}
+  .card{background:var(--card);border:1px solid rgba(200,255,0,0.1);border-radius:4px;padding:1.25rem;position:relative;overflow:hidden;}
+  .card::before{content:'';position:absolute;top:0;left:0;width:3px;height:100%;background:var(--accent);}
+  .c1::before{background:var(--gold);}.c2::before{background:#c0c0c0;}.c3::before{background:#cd7f32;}
+  .rel-card{border-color:rgba(224,80,80,0.3)!important;}.rel-card::before{background:var(--red)!important;}
+  .rnk{font-family:'Bebas Neue',sans-serif;font-size:3.5rem;line-height:1;position:absolute;top:0.2rem;right:0.8rem;color:rgba(200,255,0,0.07);}
+  .cn{font-family:'Bebas Neue',sans-serif;font-size:1.35rem;letter-spacing:0.04em;margin-bottom:0.5rem;}
+  .sr{display:flex;justify-content:space-between;align-items:center;font-size:0.84rem;color:var(--gray);padding:0.3rem 0;border-bottom:1px solid rgba(255,255,255,0.04);}
+  .sr:last-child{border-bottom:none;}.sv{color:var(--white);}
+  .big-prob{font-family:'Bebas Neue',sans-serif;font-size:2.2rem;line-height:1;}
+  .prob-row{display:flex;gap:1.1rem;margin-bottom:0.85rem;flex-wrap:wrap;}
+
+  /* Results */
+  .wh{font-family:'Bebas Neue',sans-serif;font-size:1.1rem;letter-spacing:0.1em;color:var(--accent);margin-top:1.4rem;margin-bottom:0.5rem;padding-bottom:0.3rem;border-bottom:1px solid rgba(200,255,0,0.15);}
+  .rr{display:grid;grid-template-columns:1fr auto 1fr;gap:0.5rem;align-items:center;background:var(--card);padding:0.55rem 0.85rem;border-radius:3px;margin-bottom:0.35rem;font-size:0.91rem;}
+  .rh{text-align:right;}.ra{text-align:left;}
+  .rs{font-family:'Bebas Neue',sans-serif;font-size:1.25rem;color:var(--accent);text-align:center;min-width:60px;}
+  .upcoming{background:rgba(200,255,0,0.04);border:1px solid rgba(200,255,0,0.08);}
+  .upcoming .rs{color:var(--gray);font-size:0.88rem;font-family:'DM Mono',monospace;}
+
+  /* Loading */
+  #loading{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:4rem;gap:1rem;color:var(--gray);}
+  .spinner{width:44px;height:44px;border:3px solid rgba(200,255,0,0.15);border-top-color:var(--accent);border-radius:50%;animation:spin 0.7s linear infinite;}
+  @keyframes spin{to{transform:rotate(360deg);}}
+  @media(max-width:600px){header,.content{padding:1.2rem;}.tabs{padding:0.8rem 1.2rem 0;}}
+</style>
+</head>
+<body>
+<header>
+  <div class="badge">⚽</div>
+  <div>
+    <h1>AMSA <span>Premier Division</span></h1>
+    <div class="subtitle">Fall 2025 + Spring 2026 · Poisson Distribution Predictor</div>
+    <div class="method-badge">📐 Poisson Model · 10,000-run Simulation</div>
+  </div>
+</header>
+<div class="tabs">
+  <button class="tab active" onclick="showTab('standings',this)">Current Standings</button>
+  <button class="tab" onclick="showTab('prediction',this)">🔮 Season Prediction</button>
+  <button class="tab" onclick="showTab('strength',this)">📐 Team Strength</button>
+  <button class="tab" onclick="showTab('results',this)">Results</button>
+  <button class="tab" onclick="showTab('remaining',this)">Remaining Fixtures</button>
+  <button class="tab" onclick="showTab('form',this)">Form &amp; Stats</button>
+</div>
+<div class="content">
+
+<!-- STANDINGS -->
+<div class="panel active" id="panel-standings">
+  <div class="sec">Current Standings <span class="sb sb-s">All played games</span></div>
+  <div class="legend">
+    <div class="li"><div class="ld fW"></div>Win (3 pts)</div>
+    <div class="li"><div class="ld fD"></div>Draw (1 pt)</div>
+    <div class="li"><div class="ld fL"></div>Loss (0 pts)</div>
+    <div style="color:var(--gray);font-size:0.63rem;margin-left:auto">Form = last 8 results →newest</div>
+  </div>
+  <div class="ow"><table id="tbl-cur"></table></div>
+</div>
+
+<!-- PREDICTION -->
+<div class="panel" id="panel-prediction">
+  <div class="note">
+    <strong>Poisson Distribution Model</strong> — used by professional betting companies and sports analysts.<br><br>
+    Each team's <strong>attack strength</strong> and <strong>defense strength</strong> is calibrated from all goals scored and conceded. For each remaining match, the model computes the expected goals (<code>λ</code>) for each team, then uses the Poisson formula to build a full probability matrix of every possible scoreline (0–0 through 8–8). Win/draw/loss probabilities are derived from this matrix.<br><br>
+    <strong>10,000 simulations</strong> are run and aggregated. Results show <strong>title %</strong>, <strong>relegation %</strong> (9th/10th finish), points range, and most likely final position — all stable across page loads.
+  </div>
+  <div id="loading"><div class="spinner"></div><span style="font-size:0.95rem;letter-spacing:0.1em">Running Poisson simulation (10,000 runs)...</span></div>
+  <div id="pred-content" style="display:none">
+    <div class="sec">Predicted Final Table <span class="sb sb-p">Poisson · 10,000 runs</span></div>
+    <div class="ow"><table class="pred-table" id="tbl-pred"></table></div>
+    <br>
+    <div class="sec">Team Prediction Cards</div>
+    <div class="grid" id="pred-cards"></div>
+  </div>
+</div>
+
+<!-- TEAM STRENGTH -->
+<div class="panel" id="panel-strength">
+  <div class="note">
+    <strong>How Poisson strength ratings work:</strong><br><br>
+    <strong>Attack strength</strong> = team's average goals scored ÷ league average goals scored per game<br>
+    <strong>Defense strength</strong> = team's average goals conceded ÷ league average goals conceded per game<br><br>
+    A value <strong>&gt; 1.0</strong> means above average. Expected goals for a match: <code>λ_home = attack_home × defense_away × avg_home_goals</code> and <code>λ_away = attack_away × defense_home × avg_away_goals</code>.<br>
+    Lower defense strength = harder to score against (better defense).
+  </div>
+  <div class="sec">Poisson Strength Ratings <span class="sb sb-s">Calibrated from all played results</span></div>
+  <div class="ow"><table class="strength-table" id="tbl-strength"></table></div>
+</div>
+
+<!-- RESULTS -->
+<div class="panel" id="panel-results">
+  <div class="sec">Fall 2025 Results <span class="sb sb-f">14 weeks complete</span></div>
+  <div id="fall-res"></div>
+  <br>
+  <div class="sec">Spring 2026 Results <span class="sb sb-s">Weeks 1–9 played</span></div>
+  <div id="spring-res"></div>
+</div>
+
+<!-- REMAINING -->
+<div class="panel" id="panel-remaining">
+  <div class="note"><strong>20 matches remaining</strong> across Weeks 10–14 (Apr 26 – May 24, 2026).</div>
+  <div class="sec">Remaining Fixtures <span class="sb sb-p">Weeks 10–14</span></div>
+  <div id="rem-list"></div>
+</div>
+
+<!-- FORM -->
+<div class="panel" id="panel-form">
+  <div class="sec">Team Form &amp; Stats</div>
+  <div class="grid" id="form-cards"></div>
+</div>
+
+</div>
+
+<script>
+// ── DATA ────────────────────────────────────────────────────────────────────
+const TEAMS=['ATX United - Red','ATX United - Gold','ATX United - White','Austin Athletic Club','Austin Thunder','Caledonians','Lokomotiv Zilker','Merit FC','TBD FC','VTX United FC'];
+
+const FALL=[
+  {w:1,wl:'Week 1 — Sep 7',h:'ATX United - Red',a:'TBD FC',hg:4,ag:2},
+  {w:1,wl:'Week 1 — Sep 7',h:'ATX United - Gold',a:'Austin Athletic Club',hg:2,ag:3},
+  {w:1,wl:'Week 1 — Sep 7',h:'Lokomotiv Zilker',a:'Caledonians',hg:0,ag:3},
+  {w:1,wl:'Week 1 — Sep 7',h:'Austin Thunder',a:'VTX United FC',hg:0,ag:1},
+  {w:2,wl:'Week 2 — Sep 14',h:'Austin Athletic Club',a:'Austin Thunder',hg:1,ag:2},
+  {w:2,wl:'Week 2 — Sep 14',h:'Lokomotiv Zilker',a:'ATX United - Red',hg:1,ag:4},
+  {w:2,wl:'Week 2 — Sep 14',h:'ATX United - Gold',a:'Merit FC',hg:4,ag:0},
+  {w:2,wl:'Week 2 — Sep 14',h:'TBD FC',a:'ATX United - White',hg:2,ag:0},
+  {w:2,wl:'Week 2 — Sep 14',h:'Caledonians',a:'VTX United FC',hg:3,ag:3},
+  {w:3,wl:'Week 3 — Sep 21',h:'ATX United - Gold',a:'VTX United FC',hg:2,ag:1},
+  {w:3,wl:'Week 3 — Sep 21',h:'TBD FC',a:'Caledonians',hg:4,ag:1},
+  {w:3,wl:'Week 3 — Sep 21',h:'ATX United - White',a:'ATX United - Red',hg:0,ag:2},
+  {w:3,wl:'Week 3 — Sep 21',h:'Merit FC',a:'Austin Athletic Club',hg:1,ag:4},
+  {w:3,wl:'Week 3 — Sep 21',h:'Lokomotiv Zilker',a:'Austin Thunder',hg:1,ag:2},
+  {w:4,wl:'Week 4 — Sep 28',h:'Lokomotiv Zilker',a:'ATX United - White',hg:4,ag:4},
+  {w:4,wl:'Week 4 — Sep 28',h:'Austin Thunder',a:'Merit FC',hg:5,ag:0},
+  {w:4,wl:'Week 4 — Sep 28',h:'Caledonians',a:'ATX United - Red',hg:3,ag:2},
+  {w:4,wl:'Week 4 — Sep 28',h:'TBD FC',a:'ATX United - Gold',hg:1,ag:1},
+  {w:5,wl:'Week 5 — Oct 5',h:'VTX United FC',a:'ATX United - White',hg:1,ag:0},
+  {w:5,wl:'Week 5 — Oct 5',h:'TBD FC',a:'Austin Thunder',hg:1,ag:2},
+  {w:5,wl:'Week 5 — Oct 5',h:'ATX United - Red',a:'Austin Athletic Club',hg:2,ag:1},
+  {w:6,wl:'Week 6 — Oct 19',h:'Austin Thunder',a:'ATX United - Gold',hg:2,ag:3},
+  {w:6,wl:'Week 6 — Oct 19',h:'Austin Athletic Club',a:'TBD FC',hg:0,ag:1},
+  {w:6,wl:'Week 6 — Oct 19',h:'Caledonians',a:'ATX United - White',hg:2,ag:0},
+  {w:6,wl:'Week 6 — Oct 19',h:'ATX United - Red',a:'Merit FC',hg:5,ag:1},
+  {w:6,wl:'Week 6 — Oct 19',h:'VTX United FC',a:'Lokomotiv Zilker',hg:1,ag:3},
+  {w:7,wl:'Week 7 — Nov 2',h:'VTX United FC',a:'TBD FC',hg:1,ag:2},
+  {w:7,wl:'Week 7 — Nov 2',h:'Austin Thunder',a:'Caledonians',hg:3,ag:3},
+  {w:8,wl:'Week 8 — Nov 9',h:'VTX United FC',a:'ATX United - Red',hg:1,ag:4},
+  {w:8,wl:'Week 8 — Nov 9',h:'Caledonians',a:'ATX United - Gold',hg:2,ag:0},
+  {w:8,wl:'Week 8 — Nov 9',h:'Austin Athletic Club',a:'Lokomotiv Zilker',hg:2,ag:3},
+  {w:8,wl:'Week 8 — Nov 9',h:'ATX United - White',a:'Austin Thunder',hg:0,ag:5},
+  {w:8,wl:'Week 8 — Nov 9',h:'Merit FC',a:'TBD FC',hg:1,ag:2},
+  {w:9,wl:'Week 9 — Nov 16',h:'VTX United FC',a:'Austin Athletic Club',hg:0,ag:2},
+  {w:9,wl:'Week 9 — Nov 16',h:'ATX United - Red',a:'ATX United - Gold',hg:3,ag:2},
+  {w:9,wl:'Week 9 — Nov 16',h:'TBD FC',a:'Lokomotiv Zilker',hg:5,ag:1},
+  {w:9,wl:'Week 9 — Nov 16',h:'ATX United - White',a:'Merit FC',hg:1,ag:2},
+  {w:10,wl:'Week 10 — Nov 23',h:'Lokomotiv Zilker',a:'ATX United - Gold',hg:1,ag:1},
+  {w:10,wl:'Week 10 — Nov 23',h:'ATX United - White',a:'Austin Athletic Club',hg:2,ag:1},
+  {w:11,wl:'Week 11 — Nov 30',h:'Lokomotiv Zilker',a:'Merit FC',hg:5,ag:0},
+  {w:12,wl:'Week 12 — Dec 7',h:'Merit FC',a:'Caledonians',hg:0,ag:3},
+  {w:12,wl:'Week 12 — Dec 7',h:'ATX United - Red',a:'Austin Thunder',hg:5,ag:2},
+  {w:12,wl:'Week 12 — Dec 7',h:'ATX United - Gold',a:'ATX United - White',hg:0,ag:0},
+  {w:13,wl:'Week 13 — Dec 14',h:'Merit FC',a:'VTX United FC',hg:1,ag:2},
+  {w:14,wl:'Week 14 — Feb 1',h:'Austin Athletic Club',a:'Caledonians',hg:0,ag:4},
+];
+
+const SPRING=[
+  {w:1,wl:'Week 1 — Feb 8',h:'Merit FC',a:'VTX United FC',hg:3,ag:1},
+  {w:1,wl:'Week 1 — Feb 8',h:'Austin Athletic Club',a:'Lokomotiv Zilker',hg:2,ag:3},
+  {w:2,wl:'Week 2 — Feb 22',h:'Caledonians',a:'VTX United FC',hg:2,ag:1},
+  {w:2,wl:'Week 2 — Feb 22',h:'ATX United - Gold',a:'Austin Athletic Club',hg:0,ag:0},
+  {w:2,wl:'Week 2 — Feb 22',h:'Lokomotiv Zilker',a:'Merit FC',hg:4,ag:4},
+  {w:2,wl:'Week 2 — Feb 22',h:'ATX United - Red',a:'TBD FC',hg:2,ag:1},
+  {w:2,wl:'Week 2 — Feb 22',h:'ATX United - White',a:'Austin Thunder',hg:1,ag:1},
+  {w:3,wl:'Week 3 — Mar 1',h:'ATX United - Red',a:'Caledonians',hg:3,ag:1},
+  {w:3,wl:'Week 3 — Mar 1',h:'ATX United - Gold',a:'ATX United - White',hg:1,ag:5},
+  {w:3,wl:'Week 3 — Mar 1',h:'Lokomotiv Zilker',a:'VTX United FC',hg:1,ag:1},
+  {w:3,wl:'Week 3 — Mar 1',h:'Merit FC',a:'TBD FC',hg:1,ag:7},
+  {w:3,wl:'Week 3 — Mar 1',h:'Austin Athletic Club',a:'Austin Thunder',hg:0,ag:3},
+  {w:4,wl:'Week 4 — Mar 15',h:'ATX United - Red',a:'Austin Athletic Club',hg:1,ag:2},
+  {w:5,wl:'Week 5 — Mar 22',h:'Caledonians',a:'Lokomotiv Zilker',hg:0,ag:0},
+  {w:5,wl:'Week 5 — Mar 22',h:'ATX United - Gold',a:'ATX United - Red',hg:1,ag:2},
+  {w:5,wl:'Week 5 — Mar 22',h:'Austin Athletic Club',a:'Merit FC',hg:5,ag:1},
+  {w:5,wl:'Week 5 — Mar 22',h:'ATX United - White',a:'VTX United FC',hg:2,ag:1},
+  {w:5,wl:'Week 5 — Mar 22',h:'Austin Thunder',a:'TBD FC',hg:0,ag:0},
+  {w:6,wl:'Week 6 — Mar 29',h:'ATX United - White',a:'Lokomotiv Zilker',hg:2,ag:3},
+  {w:6,wl:'Week 6 — Mar 29',h:'ATX United - Gold',a:'Merit FC',hg:3,ag:1},
+  {w:6,wl:'Week 6 — Mar 29',h:'Austin Thunder',a:'VTX United FC',hg:1,ag:2},
+  {w:9,wl:'Week 9 — Apr 19',h:'ATX United - White',a:'Caledonians',hg:2,ag:4},
+  {w:9,wl:'Week 9 — Apr 19',h:'Austin Athletic Club',a:'VTX United FC',hg:3,ag:1},
+  {w:9,wl:'Week 9 — Apr 19',h:'ATX United - Gold',a:'TBD FC',hg:1,ag:3},
+  {w:9,wl:'Week 9 — Apr 19',h:'ATX United - Red',a:'Lokomotiv Zilker',hg:0,ag:3},
+];
+
+const REMAINING=[
+  {w:10,wl:'Week 10 — Apr 26',h:'ATX United - Red',a:'ATX United - White'},
+  {w:10,wl:'Week 10 — Apr 26',h:'Lokomotiv Zilker',a:'TBD FC'},
+  {w:10,wl:'Week 10 — Apr 26',h:'Austin Athletic Club',a:'Caledonians'},
+  {w:10,wl:'Week 10 — Apr 26',h:'ATX United - Gold',a:'VTX United FC'},
+  {w:10,wl:'Week 10 — Apr 26',h:'Austin Thunder',a:'Merit FC'},
+  {w:11,wl:'Week 11 — May 3',h:'Austin Thunder',a:'Lokomotiv Zilker'},
+  {w:11,wl:'Week 11 — May 3',h:'TBD FC',a:'VTX United FC'},
+  {w:11,wl:'Week 11 — May 3',h:'ATX United - Gold',a:'Caledonians'},
+  {w:11,wl:'Week 11 — May 3',h:'ATX United - White',a:'Austin Athletic Club'},
+  {w:11,wl:'Week 11 — May 3',h:'ATX United - Red',a:'Merit FC'},
+  {w:12,wl:'Week 12 — May 10',h:'ATX United - White',a:'TBD FC'},
+  {w:12,wl:'Week 12 — May 10',h:'Caledonians',a:'Merit FC'},
+  {w:12,wl:'Week 12 — May 10',h:'ATX United - Red',a:'VTX United FC'},
+  {w:12,wl:'Week 12 — May 10',h:'ATX United - Gold',a:'Austin Thunder'},
+  {w:13,wl:'Week 13 — May 17',h:'Caledonians',a:'TBD FC'},
+  {w:13,wl:'Week 13 — May 17',h:'ATX United - Red',a:'Austin Thunder'},
+  {w:13,wl:'Week 13 — May 17',h:'ATX United - Gold',a:'Lokomotiv Zilker'},
+  {w:13,wl:'Week 13 — May 17',h:'ATX United - White',a:'Merit FC'},
+  {w:14,wl:'Week 14 — May 24',h:'Austin Thunder',a:'Caledonians'},
+  {w:14,wl:'Week 14 — May 24',h:'Austin Athletic Club',a:'TBD FC'},
+];
+
+// ── POISSON ENGINE ──────────────────────────────────────────────────────────
+
+// Poisson PMF: P(X = k) = e^(-λ) * λ^k / k!
+function poissonPMF(lambda, k) {
+  if (lambda <= 0) return k === 0 ? 1 : 0;
+  let logP = -lambda + k * Math.log(lambda);
+  for (let i = 1; i <= k; i++) logP -= Math.log(i);
+  return Math.exp(logP);
+}
+
+// Build blank team stats
+function blank() {
+  const s = {};
+  TEAMS.forEach(t => s[t] = {team:t,mp:0,w:0,d:0,l:0,gf:0,ga:0,pts:0,form:[],hgf:0,hmp:0,agf:0,amp:0,hga:0,aga:0});
+  return s;
+}
+
+function apply(s, res) {
+  res.forEach(r => {
+    const h = s[r.h], a = s[r.a];
+    if (!h || !a) return;
+    h.mp++; a.mp++;
+    h.gf += r.hg; h.ga += r.ag;
+    a.gf += r.ag; a.ga += r.hg;
+    h.hgf += r.hg; h.hmp++; h.hga += r.ag;  // home goals for/against
+    a.agf += r.ag; a.amp++; a.aga += r.hg;   // away goals for/against
+    if (r.hg > r.ag) { h.w++;h.pts+=3;a.l++;h.form.push('W');a.form.push('L'); }
+    else if (r.hg < r.ag) { a.w++;a.pts+=3;h.l++;h.form.push('L');a.form.push('W'); }
+    else { h.d++;a.d++;h.pts++;a.pts++;h.form.push('D');a.form.push('D'); }
+  });
+}
+
+function sortedArr(s) {
+  return Object.values(s).sort((a,b) => b.pts-a.pts || (b.gf-b.ga)-(a.gf-a.ga) || b.gf-a.gf);
+}
+
+// Calibrate Poisson parameters from played data
+function calibratePoisson(stats) {
+  const all = Object.values(stats);
+  let totalHG = 0, totalAG = 0, totalGames = 0;
+  all.forEach(t => { totalHG += t.hgf; totalAG += t.agf; totalGames += t.hmp; });
+  const avgHG = totalGames > 0 ? totalHG / totalGames : 1.5;  // avg home goals per game
+  const avgAG = totalGames > 0 ? totalAG / totalGames : 1.2;  // avg away goals per game
+
+  const ratings = {};
+  all.forEach(t => {
+    const hGF = t.hmp > 0 ? t.hgf / t.hmp : avgHG;
+    const hGA = t.hmp > 0 ? t.hga / t.hmp : avgAG;
+    const aGF = t.amp > 0 ? t.agf / t.amp : avgAG;
+    const aGA = t.amp > 0 ? t.aga / t.amp : avgHG;
+    // Blend home and away with slight regression to mean
+    const ATK = ((hGF / avgHG) * 0.55 + (aGF / avgAG) * 0.45);
+    const DEF = ((hGA / avgAG) * 0.55 + (aGA / avgHG) * 0.45);
+    ratings[t.team] = { ATK: Math.max(ATK, 0.2), DEF: Math.max(DEF, 0.2), avgHG, avgAG };
+  });
+  return ratings;
+}
+
+// Compute match outcome probabilities via Poisson scoreline matrix
+const MAX_GOALS = 9; // consider 0–8 goals per team
+
+function matchProbs(ratings, home, away) {
+  const r = ratings;
+  const rH = r[home], rA = r[away];
+  // Expected goals
+  const lambdaH = rH.ATK * rA.DEF * rH.avgHG;
+  const lambdaA = rA.ATK * rH.DEF * rH.avgAG;
+
+  let pHome = 0, pDraw = 0, pAway = 0;
+  for (let hg = 0; hg <= MAX_GOALS; hg++) {
+    for (let ag = 0; ag <= MAX_GOALS; ag++) {
+      const p = poissonPMF(lambdaH, hg) * poissonPMF(lambdaA, ag);
+      if (hg > ag) pHome += p;
+      else if (hg === ag) pDraw += p;
+      else pAway += p;
+    }
+  }
+  // Normalize (small truncation error from MAX_GOALS cap)
+  const tot = pHome + pDraw + pAway;
+  return { pHome: pHome/tot, pDraw: pDraw/tot, pAway: pAway/tot, lambdaH, lambdaA };
+}
+
+// Sample a scoreline from Poisson distributions
+function sampleScore(lambdaH, lambdaA) {
+  // inverse CDF sampling for Poisson
+  function sample(lambda) {
+    const L = Math.exp(-lambda);
+    let k = 0, p = 1;
+    do { k++; p *= Math.random(); } while (p > L);
+    return Math.min(k - 1, MAX_GOALS);
+  }
+  return { hg: sample(lambdaH), ag: sample(lambdaA) };
+}
+
+// ── BUILD CURRENT STATE ─────────────────────────────────────────────────────
+const cs = blank();
+apply(cs, FALL);
+apply(cs, SPRING);
+const curSorted = sortedArr(cs);
+const ratings = calibratePoisson(cs);
+
+// ── SIMULATION ──────────────────────────────────────────────────────────────
+const RUNS = 10000;
+const agg = {};
+TEAMS.forEach(t => agg[t] = { posCount: Array(10).fill(0), ptsArr: [], titleCount:0, top3Count:0, relCount:0 });
+
+for (let r = 0; r < RUNS; r++) {
+  const s = blank();
+  TEAMS.forEach(t => { const c = cs[t]; s[t] = {...c, form:[...c.form]}; });
+
+  REMAINING.forEach(f => {
+    const probs = matchProbs(ratings, f.h, f.a);
+    const { hg, ag } = sampleScore(probs.lambdaH, probs.lambdaA);
+    const hm = s[f.h], aw = s[f.a];
+    hm.mp++; aw.mp++;
+    hm.gf += hg; hm.ga += ag; aw.gf += ag; aw.ga += hg;
+    if (hg > ag) { hm.w++; hm.pts+=3; aw.l++; }
+    else if (hg < ag) { aw.w++; aw.pts+=3; hm.l++; }
+    else { hm.d++; aw.d++; hm.pts++; aw.pts++; }
+  });
+
+  const ranked = sortedArr(s);
+  ranked.forEach((t, i) => {
+    agg[t.team].posCount[i]++;
+    agg[t.team].ptsArr.push(t.pts);
+    if (i === 0) agg[t.team].titleCount++;
+    if (i <= 2)  agg[t.team].top3Count++;
+    if (i >= 8)  agg[t.team].relCount++;
+  });
+}
+
+// Compute final stats
+const teamStats = TEAMS.map(t => {
+  const a = agg[t];
+  const pts = [...a.ptsArr].sort((x,y)=>x-y);
+  const median = pts[Math.floor(RUNS/2)];
+  const p10 = pts[Math.floor(RUNS*0.1)];
+  const p90 = pts[Math.floor(RUNS*0.9)];
+  const mlPos = a.posCount.indexOf(Math.max(...a.posCount)) + 1;
+  const mlPct = (Math.max(...a.posCount)/RUNS*100).toFixed(0);
+  return {
+    team:t, median, p10, p90, min:pts[0], max:pts[RUNS-1],
+    mlPos, mlPct,
+    titlePct: (a.titleCount/RUNS*100).toFixed(1),
+    top3Pct:  (a.top3Count/RUNS*100).toFixed(1),
+    relPct:   (a.relCount/RUNS*100).toFixed(1),
+    posCount: a.posCount,
+    ...cs[t]
+  };
+}).sort((a,b) => b.median-a.median || parseFloat(b.titlePct)-parseFloat(a.titlePct));
+
+// ── RENDER FUNCTIONS ────────────────────────────────────────────────────────
+
+function pBar(pct, color, width=90) {
+  const v = Math.min(parseFloat(pct), 100);
+  return `<div class="pb-wrap">
+    <div class="pb-bg" style="width:${width}px"><div class="pb-fill" style="width:${v}%;background:${color}"></div></div>
+    <span class="pb-val" style="color:${color}">${pct}%</span>
+  </div>`;
+}
+
+function renderCurrentTable() {
+  document.getElementById('tbl-cur').innerHTML = `
+    <thead><tr><th>#</th><th>Team</th><th>MP</th><th>W</th><th>D</th><th>L</th><th>GF</th><th>GA</th><th>GD</th><th>Pts</th><th>Form</th></tr></thead>
+    <tbody>${curSorted.map((t,i)=>{
+      const gd=t.gf-t.ga,gc=gd>0?'gdp':gd<0?'gdn':'gd0';
+      return`<tr class="p${i+1}"><td class="pos">${i+1}</td><td class="tname">${t.team}</td>
+        <td class="nc">${t.mp}</td><td class="nc">${t.w}</td><td class="nc">${t.d}</td><td class="nc">${t.l}</td>
+        <td class="nc">${t.gf}</td><td class="nc">${t.ga}</td>
+        <td class="nc ${gc}">${gd>0?'+':''}${gd}</td>
+        <td class="ptsc">${t.pts}</td>
+        <td><div class="fd-row">${t.form.slice(-7).map(f=>`<div class="fd f${f}"></div>`).join('')}</div></td>
+      </tr>`;
+    }).join('')}</tbody>`;
+}
+
+function renderPredTable() {
+  document.getElementById('tbl-pred').innerHTML = `
+    <thead><tr>
+      <th>#</th><th>Team</th>
+      <th title="Median predicted final points">Med Pts</th>
+      <th title="10th–90th percentile range">Pts Range</th>
+      <th title="Most likely finishing position">Likely Pos</th>
+      <th title="% finishing 1st">🏆 Title %</th>
+      <th title="% finishing top 3">Top 3 %</th>
+      <th title="% finishing 9th or 10th">⚠️ Relegation %</th>
+    </tr></thead>
+    <tbody>${teamStats.map((t,i)=>{
+      const relHigh = parseFloat(t.relPct) > 50;
+      const posColor = i===0?'var(--gold)':i===1?'#c0c0c0':i===2?'#cd7f32':relHigh?'var(--red)':'var(--gray)';
+      return`<tr class="${relHigh?'rel-zone':''}">
+        <td class="pos" style="color:${posColor}">${i+1}</td>
+        <td class="tname">${t.team}${relHigh?'<span class="rel-label">danger</span>':''}</td>
+        <td class="ptsc">${t.median}</td>
+        <td style="font-size:0.68rem;color:var(--gray)">${t.p10}–${t.p90}</td>
+        <td style="font-family:'Bebas Neue';font-size:1.05rem;text-align:center;color:${t.mlPos<=3?'var(--accent)':t.mlPos>=9?'var(--red)':'var(--white)'}">${t.mlPos}<span style="font-family:'DM Mono';font-size:0.6rem;color:var(--gray)"> (${t.mlPct}%)</span></td>
+        <td>${pBar(t.titlePct,'var(--gold)')}</td>
+        <td>${pBar(t.top3Pct,'var(--accent)')}</td>
+        <td>${pBar(t.relPct, parseFloat(t.relPct)>40?'var(--red)':parseFloat(t.relPct)>15?'var(--orange)':'var(--gray)')}</td>
+      </tr>`;
+    }).join('')}</tbody>`;
+}
+
+function renderStrengthTable() {
+  const maxATK = Math.max(...TEAMS.map(t=>ratings[t].ATK));
+  const maxDEF = Math.max(...TEAMS.map(t=>ratings[t].DEF));
+  const sorted = [...TEAMS].sort((a,b)=>ratings[b].ATK-ratings[a].ATK);
+
+  // Compute expected goals for each team in a "neutral" match
+  document.getElementById('tbl-strength').innerHTML = `
+    <thead><tr>
+      <th>Team</th>
+      <th title="Attack strength vs league average. >1.0 = above average scorer">⚡ Attack Str.</th>
+      <th title="Defense strength vs league average. >1.0 = above average goals conceded">🛡 Defense Str.</th>
+      <th title="Expected goals scored per game (home)">Exp Goals (H)</th>
+      <th title="Expected goals conceded per game (home)">Exp Conc (H)</th>
+    </tr></thead>
+    <tbody>${sorted.map(t=>{
+      const r=ratings[t];
+      // expected in a match vs average opponent
+      const expGF=(r.ATK*1.0*r.avgHG).toFixed(2);
+      const expGA=(r.DEF*1.0*r.avgAG).toFixed(2);
+      const atkW=Math.round((r.ATK/maxATK)*100);
+      const defW=Math.round((r.DEF/maxDEF)*100);
+      const defColor=r.DEF<1?'var(--accent)':'var(--red)'; // lower def = better
+      return`<tr>
+        <td class="tname">${t}</td>
+        <td>
+          <span style="color:${r.ATK>=1?'var(--accent)':'var(--gray)'};font-weight:500">${r.ATK.toFixed(3)}</span>
+          <div class="atk-bar"><div class="atk-fill" style="width:${atkW}%"></div></div>
+        </td>
+        <td>
+          <span style="color:${r.DEF<1?'var(--accent)':'var(--red)'};font-weight:500">${r.DEF.toFixed(3)}</span>
+          <div class="def-bar"><div class="def-fill" style="width:${defW}%"></div></div>
+        </td>
+        <td style="text-align:center;color:var(--white)">${expGF}</td>
+        <td style="text-align:center;color:${parseFloat(expGA)<1.5?'var(--accent)':'var(--red)'}">${expGA}</td>
+      </tr>`;
+    }).join('')}</tbody>`;
+}
+
+function renderPredCards() {
+  document.getElementById('pred-cards').innerHTML = teamStats.map((t,i)=>{
+    const isRel = parseFloat(t.relPct) > 40;
+    const bc = isRel?'rel-card':i===0?'c1':i===1?'c2':i===2?'c3':'';
+    const nc = i===0?'var(--gold)':i===1?'#c0c0c0':i===2?'#cd7f32':isRel?'var(--red)':'var(--white)';
+    const remGames = REMAINING.filter(f=>f.h===t.team||f.a===t.team).length;
+    const r = ratings[t.team];
+    return`<div class="card ${bc}">
+      <div class="rnk">${i+1}</div>
+      <div class="cn" style="color:${nc}">${t.team}</div>
+      <div class="prob-row">
+        ${parseFloat(t.titlePct)>0?`<div><div class="big-prob" style="color:var(--gold)">${t.titlePct}%</div><div style="font-size:0.58rem;color:var(--gray);letter-spacing:0.08em">TITLE</div></div>`:''}
+        <div><div class="big-prob" style="color:var(--accent)">${t.top3Pct}%</div><div style="font-size:0.58rem;color:var(--gray);letter-spacing:0.08em">TOP 3</div></div>
+        ${parseFloat(t.relPct)>0?`<div><div class="big-prob" style="color:${parseFloat(t.relPct)>40?'var(--red)':'var(--orange)'}">${t.relPct}%</div><div style="font-size:0.58rem;color:var(--gray);letter-spacing:0.08em">RELEGATION</div></div>`:''}
+      </div>
+      <div class="sr"><span>Median predicted pts</span><span class="sv" style="font-family:'Bebas Neue';font-size:1rem;color:var(--accent)">${t.median}</span></div>
+      <div class="sr"><span>Points range (p10–p90)</span><span class="sv">${t.p10} – ${t.p90}</span></div>
+      <div class="sr"><span>Most likely position</span><span class="sv">${t.mlPos} (${t.mlPct}% of runs)</span></div>
+      <div class="sr"><span>Current pts</span><span class="sv">${t.pts}</span></div>
+      <div class="sr"><span>Attack strength</span><span class="sv" style="color:${r.ATK>=1?'var(--accent)':'var(--gray)'}">${r.ATK.toFixed(3)}</span></div>
+      <div class="sr"><span>Defense strength</span><span class="sv" style="color:${r.DEF<1?'var(--accent)':'var(--red)'}">${r.DEF.toFixed(3)}</span></div>
+      <div class="sr"><span>Games remaining</span><span class="sv">${remGames}</span></div>
+    </div>`;
+  }).join('');
+}
+
+function renderResultGroup(elId, res) {
+  const el = document.getElementById(elId);
+  const wks = [...new Set(res.map(r=>r.w))].sort((a,b)=>a-b);
+  el.innerHTML = wks.map(w=>{
+    const g = res.filter(r=>r.w===w);
+    return`<div class="wh">${g[0].wl}</div>${g.map(r=>`<div class="rr">
+      <div class="rh" style="font-weight:${r.hg>r.ag?600:400};color:${r.hg>r.ag?'var(--white)':'var(--gray)'}">${r.h}</div>
+      <div class="rs">${r.hg} – ${r.ag}</div>
+      <div class="ra" style="font-weight:${r.ag>r.hg?600:400};color:${r.ag>r.hg?'var(--white)':'var(--gray)'}">${r.a}</div>
+    </div>`).join('')}`;
+  }).join('');
+}
+
+function renderRemaining() {
+  const wks = [...new Set(REMAINING.map(r=>r.w))].sort((a,b)=>a-b);
+  document.getElementById('rem-list').innerHTML = wks.map(w=>{
+    const g = REMAINING.filter(r=>r.w===w);
+    const probs = g.map(f=>{
+      const p = matchProbs(ratings,f.h,f.a);
+      return `<div class="rr upcoming">
+        <div class="rh" style="color:var(--white)">${f.h}<br><span style="font-size:0.6rem;color:var(--accent)">${(p.pHome*100).toFixed(0)}% win</span></div>
+        <div class="rs" style="font-size:0.65rem;line-height:1.4;color:var(--gray)">λ ${p.lambdaH.toFixed(1)}–${p.lambdaA.toFixed(1)}<br><span style="color:var(--gold)">${(p.pDraw*100).toFixed(0)}% draw</span></div>
+        <div class="ra" style="color:var(--white)">${f.a}<br><span style="font-size:0.6rem;color:var(--accent)">${(p.pAway*100).toFixed(0)}% win</span></div>
+      </div>`;
+    }).join('');
+    return`<div class="wh">${g[0].wl}</div>${probs}`;
+  }).join('');
+}
+
+function renderForm() {
+  // compute extra per-team stats from raw results
+  const allResults = [...FALL, ...SPRING];
+
+  function teamExtraStats(teamName) {
+    const homeGames = allResults.filter(r => r.h === teamName);
+    const awayGames = allResults.filter(r => r.a === teamName);
+
+    // home record
+    let hW=0,hD=0,hL=0,hGF=0,hGA=0;
+    homeGames.forEach(r=>{hGF+=r.hg;hGA+=r.ag;if(r.hg>r.ag)hW++;else if(r.hg===r.ag)hD++;else hL++;});
+
+    // away record
+    let aW=0,aD=0,aL=0,aGF=0,aGA=0;
+    awayGames.forEach(r=>{aGF+=r.ag;aGA+=r.hg;if(r.ag>r.hg)aW++;else if(r.ag===r.hg)aD++;else aL++;});
+
+    // biggest win margin — only look at games this team played
+    let bigWin=null, bigLoss=null;
+    allResults.forEach(r=>{
+      const isHome = r.h === teamName;
+      const isAway = r.a === teamName;
+      if (!isHome && !isAway) return; // skip games this team didn't play in
+      const tg = isHome ? r.hg : r.ag;
+      const og = isHome ? r.ag : r.hg;
+      const margin = tg - og;
+      const opp = isHome ? r.a : r.h;
+      if(margin>0&&(bigWin===null||margin>bigWin.margin)) bigWin={margin,tg,og,opp};
+      if(margin<0&&(bigLoss===null||margin<bigLoss.margin)) bigLoss={margin,tg,og,opp};
+    });
+
+    // current streak
+    const form = curSorted.find(t=>t.team===teamName)?.form || [];
+    let streak=0, streakType='';
+    for(let i=form.length-1;i>=0;i--){
+      if(i===form.length-1){streakType=form[i];streak=1;}
+      else if(form[i]===streakType){streak++;}
+      else break;
+    }
+
+    // clean sheets
+    let cleanSheets=0;
+    allResults.forEach(r=>{
+      if(r.h===teamName&&r.ag===0) cleanSheets++;
+      if(r.a===teamName&&r.hg===0) cleanSheets++;
+    });
+
+    // scored in every game
+    let failedToScore=0;
+    allResults.forEach(r=>{
+      if(r.h===teamName&&r.hg===0) failedToScore++;
+      if(r.a===teamName&&r.ag===0) failedToScore++;
+    });
+
+    return {hW,hD,hL,hGF,hGA,hMP:homeGames.length,aW,aD,aL,aGF,aGA,aMP:awayGames.length,bigWin,bigLoss,streak,streakType,cleanSheets,failedToScore};
+  }
+
+  document.getElementById('form-cards').innerHTML = curSorted.map((t,rank)=>{
+    const gd=t.gf-t.ga;
+    const ppg=t.mp>0?(t.pts/t.mp).toFixed(2):'–';
+    const agf=t.mp>0?(t.gf/t.mp).toFixed(2):'–';
+    const aga=t.mp>0?(t.ga/t.mp).toFixed(2):'–';
+    const winPct=t.mp>0?((t.w/t.mp)*100).toFixed(0):'0';
+    const ex=teamExtraStats(t.team);
+    const r=ratings[t.team];
+    const streakColor=ex.streakType==='W'?'var(--accent)':ex.streakType==='L'?'var(--red)':'var(--gold)';
+    const streakLabel=ex.streakType==='W'?`${ex.streak}-game win streak`:ex.streakType==='L'?`${ex.streak}-game losing streak`:`${ex.streak}-game draw streak`;
+    const nameColor=rank===0?'var(--gold)':rank===1?'#c0c0c0':rank===2?'#cd7f32':'var(--white)';
+    const borderClass=rank===0?'c1':rank===1?'c2':rank===2?'c3':'';
+
+    return`<div class="card ${borderClass}" style="grid-column:span 1">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:0.5rem">
+        <div class="cn" style="color:${nameColor}">${t.team}</div>
+        <div style="font-family:'Bebas Neue',sans-serif;font-size:1rem;color:var(--gray)">#${rank+1}</div>
+      </div>
+
+      <!-- All-game form dots -->
+      <div style="margin-bottom:0.3rem;font-size:0.72rem;color:var(--gray);letter-spacing:0.08em">ALL GAMES FORM (${t.form.length} played)</div>
+      <div style="display:flex;gap:3px;margin-bottom:1rem;flex-wrap:wrap">
+        ${t.form.map(f=>`<div class="fd f${f}" style="width:10px;height:10px" title="${f}"></div>`).join('')}
+      </div>
+
+      <!-- Current streak -->
+      ${ex.streak>0?`<div style="background:rgba(200,255,0,0.06);border-left:3px solid ${streakColor};padding:0.4rem 0.7rem;margin-bottom:0.85rem;font-size:0.82rem;color:${streakColor}">${streakLabel}</div>`:''}
+
+      <!-- Core stats -->
+      <div style="font-size:0.72rem;color:var(--gray);letter-spacing:0.08em;margin-bottom:0.4rem">SEASON RECORD</div>
+      <div class="sr"><span>Points</span><span class="sv" style="font-family:'Bebas Neue',sans-serif;font-size:1.3rem;color:var(--accent)">${t.pts}</span></div>
+      <div class="sr"><span>Played / Won / Drawn / Lost</span><span class="sv">${t.mp} / ${t.w} / ${t.d} / ${t.l}</span></div>
+      <div class="sr"><span>Win rate</span><span class="sv" style="color:${parseInt(winPct)>=50?'var(--accent)':'var(--gray)'}">${winPct}%</span></div>
+      <div class="sr"><span>Pts per game</span><span class="sv">${ppg}</span></div>
+      <div class="sr"><span>Goals scored / conceded</span><span class="sv">${t.gf} / ${t.ga}</span></div>
+      <div class="sr"><span>Goals scored per game</span><span class="sv">${agf}</span></div>
+      <div class="sr"><span>Goals conceded per game</span><span class="sv">${aga}</span></div>
+      <div class="sr"><span>Goal difference</span><span class="sv" style="color:${gd>=0?'var(--accent)':'var(--red)'}">${gd>0?'+':''}${gd}</span></div>
+      <div class="sr"><span>Clean sheets</span><span class="sv">${ex.cleanSheets}</span></div>
+      <div class="sr"><span>Failed to score</span><span class="sv">${ex.failedToScore}</span></div>
+
+      <!-- Home / Away split -->
+      <div style="font-size:0.72rem;color:var(--gray);letter-spacing:0.08em;margin:0.85rem 0 0.4rem">HOME / AWAY SPLIT</div>
+      <div class="sr"><span>Home record</span><span class="sv">${ex.hW}W ${ex.hD}D ${ex.hL}L (${ex.hMP} games)</span></div>
+      <div class="sr"><span>Home goals</span><span class="sv">${ex.hGF} scored / ${ex.hGA} conceded</span></div>
+      <div class="sr"><span>Away record</span><span class="sv">${ex.aW}W ${ex.aD}D ${ex.aL}L (${ex.aMP} games)</span></div>
+      <div class="sr"><span>Away goals</span><span class="sv">${ex.aGF} scored / ${ex.aGA} conceded</span></div>
+
+      <!-- Biggest results -->
+      <div style="font-size:0.72rem;color:var(--gray);letter-spacing:0.08em;margin:0.85rem 0 0.4rem">NOTABLE RESULTS</div>
+      ${ex.bigWin?`<div class="sr"><span>Biggest win</span><span class="sv" style="color:var(--accent)">${ex.bigWin.tg}–${ex.bigWin.og} vs ${ex.bigWin.opp}</span></div>`:''}
+      ${ex.bigLoss?`<div class="sr"><span>Biggest loss</span><span class="sv" style="color:var(--red)">${ex.bigLoss.tg}–${ex.bigLoss.og} vs ${ex.bigLoss.opp}</span></div>`:''}
+
+      <!-- Poisson ratings -->
+      <div style="font-size:0.72rem;color:var(--gray);letter-spacing:0.08em;margin:0.85rem 0 0.4rem">POISSON RATINGS</div>
+      <div class="sr"><span>Attack strength</span><span class="sv" style="color:${r.ATK>=1?'var(--accent)':'var(--gray)'}">${r.ATK.toFixed(3)} ${r.ATK>=1?'▲ above avg':'▼ below avg'}</span></div>
+      <div class="sr"><span>Defense strength</span><span class="sv" style="color:${r.DEF<1?'var(--accent)':'var(--red)'}">${r.DEF.toFixed(3)} ${r.DEF<1?'▲ hard to score vs':'▼ leaky defense'}</span></div>
+      <div class="sr"><span>xG scored per game</span><span class="sv">${(r.ATK*r.aH).toFixed(2)}</span></div>
+      <div class="sr"><span>xG conceded per game</span><span class="sv">${(r.DEF*r.aA).toFixed(2)}</span></div>
+    </div>`;
+  }).join('');
+}
+
+function showTab(id,btn){
+  document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  document.getElementById('panel-'+id).classList.add('active');
+  btn.classList.add('active');
+}
+
+// Init
+renderCurrentTable();
+renderForm();
+renderResultGroup('fall-res', FALL);
+renderResultGroup('spring-res', SPRING);
+
+setTimeout(()=>{
+  renderPredTable();
+  renderPredCards();
+  renderStrengthTable();
+  renderRemaining();
+  document.getElementById('loading').style.display='none';
+  document.getElementById('pred-content').style.display='block';
+}, 80);
+</script>
+</body>
+</html>
