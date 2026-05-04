@@ -11,93 +11,93 @@
     --accent:#c8ff00;--gold:#f0c040;--red:#e05050;--orange:#ff8c42;--blue:#60a0e0;
   }
   *{margin:0;padding:0;box-sizing:border-box;}
-  body{background:var(--pitch);color:var(--white);font-family:'DM Mono',monospace;font-size:15px;min-height:100vh;
+  body{background:var(--pitch);color:var(--white);font-family:'DM Mono',monospace;font-size:17px;min-height:100vh;
     background-image:repeating-linear-gradient(0deg,transparent,transparent 79px,rgba(200,255,0,0.025) 79px,rgba(200,255,0,0.025) 80px),repeating-linear-gradient(90deg,transparent,transparent 79px,rgba(200,255,0,0.025) 79px,rgba(200,255,0,0.025) 80px);}
   header{border-bottom:2px solid var(--accent);padding:2rem 2.5rem 1.5rem;display:flex;align-items:flex-end;gap:1.5rem;flex-wrap:wrap;}
   .badge{width:58px;height:58px;background:var(--accent);clip-path:polygon(50% 0%,100% 25%,100% 75%,50% 100%,0% 75%,0% 25%);display:flex;align-items:center;justify-content:center;font-size:1.6rem;flex-shrink:0;}
   h1{font-family:'Bebas Neue',sans-serif;font-size:clamp(2.2rem,5vw,3.6rem);letter-spacing:0.04em;line-height:1;}
   h1 span{color:var(--accent);}
-  .subtitle{font-size:0.82rem;color:var(--gray);letter-spacing:0.15em;text-transform:uppercase;margin-top:0.25rem;}
-  .method-badge{display:inline-flex;align-items:center;gap:0.5rem;background:rgba(200,255,0,0.1);border:1px solid rgba(200,255,0,0.3);border-radius:20px;padding:0.35rem 1rem;font-size:0.82rem;color:var(--accent);letter-spacing:0.08em;margin-top:0.5rem;}
+  .subtitle{font-size:0.92rem;color:var(--gray);letter-spacing:0.15em;text-transform:uppercase;margin-top:0.25rem;}
+  .method-badge{display:inline-flex;align-items:center;gap:0.5rem;background:rgba(200,255,0,0.1);border:1px solid rgba(200,255,0,0.3);border-radius:20px;padding:0.35rem 1rem;font-size:0.92rem;color:var(--accent);letter-spacing:0.08em;margin-top:0.5rem;}
   .tabs{display:flex;padding:1.2rem 2.5rem 0;border-bottom:1px solid rgba(200,255,0,0.15);overflow-x:auto;}
-  .tab{padding:0.65rem 1.5rem;font-family:'Bebas Neue',sans-serif;font-size:1.1rem;letter-spacing:0.1em;color:var(--gray);cursor:pointer;border:none;border-bottom:2px solid transparent;background:none;transition:all 0.2s;white-space:nowrap;}
+  .tab{padding:0.65rem 1.5rem;font-family:'Bebas Neue',sans-serif;font-size:1.2rem;letter-spacing:0.1em;color:var(--gray);cursor:pointer;border:none;border-bottom:2px solid transparent;background:none;transition:all 0.2s;white-space:nowrap;}
   .tab.active{color:var(--accent);border-bottom-color:var(--accent);}
   .tab:hover:not(.active){color:var(--white);}
   .content{padding:2rem 2.5rem;}
   .panel{display:none;}.panel.active{display:block;}
-  .sec{font-family:'Bebas Neue',sans-serif;font-size:1.55rem;letter-spacing:0.08em;color:var(--white);margin-bottom:1rem;display:flex;align-items:center;gap:0.75rem;}
+  .sec{font-family:'Bebas Neue',sans-serif;font-size:1.7rem;letter-spacing:0.08em;color:var(--white);margin-bottom:1rem;display:flex;align-items:center;gap:0.75rem;}
   .sec::after{content:'';flex:1;height:1px;background:rgba(200,255,0,0.15);}
-  .note{background:rgba(200,255,0,0.06);border-left:3px solid var(--accent);padding:1rem 1.1rem;font-size:0.88rem;color:var(--gray);margin-bottom:1.5rem;line-height:1.8;}
+  .note{background:rgba(200,255,0,0.06);border-left:3px solid var(--accent);padding:1rem 1.1rem;font-size:0.96rem;color:var(--gray);margin-bottom:1.5rem;line-height:1.8;}
   .note strong{color:var(--white);}
-  .note code{background:rgba(200,255,0,0.1);padding:0.1rem 0.35rem;border-radius:2px;color:var(--accent);font-size:0.84rem;}
-  .sb{display:inline-block;font-size:0.72rem;letter-spacing:0.1em;text-transform:uppercase;padding:0.2rem 0.5rem;border-radius:2px;margin-left:0.5rem;vertical-align:middle;}
+  .note code{background:rgba(200,255,0,0.1);padding:0.1rem 0.35rem;border-radius:2px;color:var(--accent);font-size:0.92rem;}
+  .sb{display:inline-block;font-size:0.8rem;letter-spacing:0.1em;text-transform:uppercase;padding:0.2rem 0.5rem;border-radius:2px;margin-left:0.5rem;vertical-align:middle;}
   .sb-f{background:rgba(240,192,64,0.2);color:var(--gold);}
   .sb-s{background:rgba(200,255,0,0.15);color:var(--accent);}
   .sb-p{background:rgba(255,140,66,0.2);color:var(--orange);}
   .ow{overflow-x:auto;}
 
   /* Tables */
-  table{width:100%;border-collapse:collapse;font-size:0.93rem;min-width:600px;}
-  th{font-family:'Bebas Neue',sans-serif;font-size:1rem;letter-spacing:0.1em;color:var(--accent);text-align:left;padding:0.6rem 0.85rem;border-bottom:1px solid rgba(200,255,0,0.25);}
-  td{padding:0.7rem 0.85rem;border-bottom:1px solid rgba(255,255,255,0.04);vertical-align:middle;}
+  table{width:100%;border-collapse:collapse;font-size:1.02rem;min-width:600px;}
+  th{font-family:'Bebas Neue',sans-serif;font-size:1.08rem;letter-spacing:0.1em;color:var(--accent);text-align:left;padding:0.65rem 0.9rem;border-bottom:1px solid rgba(200,255,0,0.25);}
+  td{padding:0.75rem 0.9rem;border-bottom:1px solid rgba(255,255,255,0.04);vertical-align:middle;}
   tr:hover td{background:rgba(200,255,0,0.03);}
-  .pos{font-family:'Bebas Neue',sans-serif;font-size:1.3rem;color:var(--gray);width:32px;}
+  .pos{font-family:'Bebas Neue',sans-serif;font-size:1.4rem;color:var(--gray);width:32px;}
   .p1 .pos{color:var(--gold);}.p2 .pos{color:#c0c0c0;}.p3 .pos{color:#cd7f32;}
-  .tname{font-weight:500;font-size:0.95rem;}
-  .ptsc{font-family:'Bebas Neue',sans-serif;font-size:1.5rem;color:var(--accent);text-align:center;}
+  .tname{font-weight:500;font-size:1.02rem;}
+  .ptsc{font-family:'Bebas Neue',sans-serif;font-size:1.6rem;color:var(--accent);text-align:center;}
   .nc{text-align:center;color:var(--gray);}
   .gdp{color:var(--accent);}.gdn{color:var(--red);}.gd0{color:var(--gray);}
   .fd-row{display:flex;gap:4px;}
-  .fd{width:10px;height:10px;border-radius:50%;flex-shrink:0;}
+  .fd{width:11px;height:11px;border-radius:50%;flex-shrink:0;}
   .fW{background:var(--accent);}.fD{background:var(--gold);}.fL{background:var(--red);}
-  .legend{display:flex;gap:1.5rem;font-size:0.82rem;color:var(--gray);margin-bottom:1rem;flex-wrap:wrap;}
+  .legend{display:flex;gap:1.5rem;font-size:0.9rem;color:var(--gray);margin-bottom:1rem;flex-wrap:wrap;}
   .li{display:flex;align-items:center;gap:0.4rem;}
-  .ld{width:10px;height:10px;border-radius:50%;}
+  .ld{width:11px;height:11px;border-radius:50%;}
 
   /* Pred table */
-  .pred-table{width:100%;border-collapse:collapse;font-size:0.91rem;min-width:760px;}
-  .pred-table th{font-family:'Bebas Neue',sans-serif;font-size:0.98rem;letter-spacing:0.1em;color:var(--accent);text-align:left;padding:0.6rem 0.85rem;border-bottom:1px solid rgba(200,255,0,0.25);}
-  .pred-table td{padding:0.7rem 0.85rem;border-bottom:1px solid rgba(255,255,255,0.04);vertical-align:middle;}
+  .pred-table{width:100%;border-collapse:collapse;font-size:1rem;min-width:780px;}
+  .pred-table th{font-family:'Bebas Neue',sans-serif;font-size:1.05rem;letter-spacing:0.1em;color:var(--accent);text-align:left;padding:0.65rem 0.9rem;border-bottom:1px solid rgba(200,255,0,0.25);}
+  .pred-table td{padding:0.75rem 0.9rem;border-bottom:1px solid rgba(255,255,255,0.04);vertical-align:middle;}
   .pred-table tr:hover td{background:rgba(200,255,0,0.03);}
   .rel-zone td{background:rgba(224,80,80,0.05);}
   .rel-zone:hover td{background:rgba(224,80,80,0.1)!important;}
-  .rel-label{font-size:0.72rem;color:var(--red);letter-spacing:0.08em;text-transform:uppercase;margin-left:0.4rem;}
+  .rel-label{font-size:0.78rem;color:var(--red);letter-spacing:0.08em;text-transform:uppercase;margin-left:0.4rem;}
 
   /* Prob bar */
   .pb-wrap{display:flex;align-items:center;gap:0.5rem;}
   .pb-bg{height:7px;background:rgba(255,255,255,0.08);border-radius:3px;overflow:hidden;flex:1;min-width:80px;}
   .pb-fill{height:100%;border-radius:3px;}
-  .pb-val{font-size:0.88rem;min-width:44px;text-align:right;font-weight:500;}
+  .pb-val{font-size:0.94rem;min-width:46px;text-align:right;font-weight:500;}
 
   /* Poisson strength table */
-  .strength-table{width:100%;border-collapse:collapse;font-size:0.91rem;min-width:520px;}
-  .strength-table th{font-family:'Bebas Neue',sans-serif;font-size:0.98rem;letter-spacing:0.1em;color:var(--accent);padding:0.6rem 0.85rem;border-bottom:1px solid rgba(200,255,0,0.25);text-align:left;}
-  .strength-table td{padding:0.7rem 0.85rem;border-bottom:1px solid rgba(255,255,255,0.04);}
+  .strength-table{width:100%;border-collapse:collapse;font-size:1rem;min-width:520px;}
+  .strength-table th{font-family:'Bebas Neue',sans-serif;font-size:1.05rem;letter-spacing:0.1em;color:var(--accent);padding:0.65rem 0.9rem;border-bottom:1px solid rgba(200,255,0,0.25);text-align:left;}
+  .strength-table td{padding:0.75rem 0.9rem;border-bottom:1px solid rgba(255,255,255,0.04);}
   .atk-bar{height:6px;background:rgba(200,255,0,0.15);border-radius:2px;margin-top:4px;overflow:hidden;}
   .atk-fill{height:100%;background:var(--accent);border-radius:2px;}
   .def-bar{height:6px;background:rgba(224,80,80,0.15);border-radius:2px;margin-top:4px;overflow:hidden;}
   .def-fill{height:100%;background:var(--red);border-radius:2px;}
 
   /* Cards */
-  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:1.1rem;margin-top:0.5rem;}
-  .card{background:var(--card);border:1px solid rgba(200,255,0,0.1);border-radius:4px;padding:1.25rem;position:relative;overflow:hidden;}
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:1.2rem;margin-top:0.5rem;}
+  .card{background:var(--card);border:1px solid rgba(200,255,0,0.1);border-radius:4px;padding:1.35rem;position:relative;overflow:hidden;}
   .card::before{content:'';position:absolute;top:0;left:0;width:3px;height:100%;background:var(--accent);}
   .c1::before{background:var(--gold);}.c2::before{background:#c0c0c0;}.c3::before{background:#cd7f32;}
   .rel-card{border-color:rgba(224,80,80,0.3)!important;}.rel-card::before{background:var(--red)!important;}
   .rnk{font-family:'Bebas Neue',sans-serif;font-size:3.5rem;line-height:1;position:absolute;top:0.2rem;right:0.8rem;color:rgba(200,255,0,0.07);}
-  .cn{font-family:'Bebas Neue',sans-serif;font-size:1.35rem;letter-spacing:0.04em;margin-bottom:0.5rem;}
-  .sr{display:flex;justify-content:space-between;align-items:center;font-size:0.84rem;color:var(--gray);padding:0.3rem 0;border-bottom:1px solid rgba(255,255,255,0.04);}
+  .cn{font-family:'Bebas Neue',sans-serif;font-size:1.45rem;letter-spacing:0.04em;margin-bottom:0.5rem;}
+  .sr{display:flex;justify-content:space-between;align-items:center;font-size:0.9rem;color:var(--gray);padding:0.3rem 0;border-bottom:1px solid rgba(255,255,255,0.04);}
   .sr:last-child{border-bottom:none;}.sv{color:var(--white);}
-  .big-prob{font-family:'Bebas Neue',sans-serif;font-size:2.2rem;line-height:1;}
-  .prob-row{display:flex;gap:1.1rem;margin-bottom:0.85rem;flex-wrap:wrap;}
+  .big-prob{font-family:'Bebas Neue',sans-serif;font-size:2.3rem;line-height:1;}
+  .prob-row{display:flex;gap:1.1rem;margin-bottom:0.9rem;flex-wrap:wrap;}
 
   /* Results */
-  .wh{font-family:'Bebas Neue',sans-serif;font-size:1.1rem;letter-spacing:0.1em;color:var(--accent);margin-top:1.4rem;margin-bottom:0.5rem;padding-bottom:0.3rem;border-bottom:1px solid rgba(200,255,0,0.15);}
-  .rr{display:grid;grid-template-columns:1fr auto 1fr;gap:0.5rem;align-items:center;background:var(--card);padding:0.55rem 0.85rem;border-radius:3px;margin-bottom:0.35rem;font-size:0.91rem;}
+  .wh{font-family:'Bebas Neue',sans-serif;font-size:1.18rem;letter-spacing:0.1em;color:var(--accent);margin-top:1.4rem;margin-bottom:0.5rem;padding-bottom:0.3rem;border-bottom:1px solid rgba(200,255,0,0.15);}
+  .rr{display:grid;grid-template-columns:1fr auto 1fr;gap:0.5rem;align-items:center;background:var(--card);padding:0.6rem 0.9rem;border-radius:3px;margin-bottom:0.35rem;font-size:0.98rem;}
   .rh{text-align:right;}.ra{text-align:left;}
-  .rs{font-family:'Bebas Neue',sans-serif;font-size:1.25rem;color:var(--accent);text-align:center;min-width:60px;}
+  .rs{font-family:'Bebas Neue',sans-serif;font-size:1.35rem;color:var(--accent);text-align:center;min-width:62px;}
   .upcoming{background:rgba(200,255,0,0.04);border:1px solid rgba(200,255,0,0.08);}
-  .upcoming .rs{color:var(--gray);font-size:0.88rem;font-family:'DM Mono',monospace;}
+  .upcoming .rs{color:var(--gray);font-size:0.92rem;font-family:'DM Mono',monospace;}
 
   /* Loading */
   #loading{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:4rem;gap:1rem;color:var(--gray);}
@@ -140,9 +140,21 @@
 <!-- PREDICTION -->
 <div class="panel" id="panel-prediction">
   <div class="note">
-    <strong>Poisson Distribution Model</strong> — used by professional betting companies and sports analysts.<br><br>
-    Each team's <strong>attack strength</strong> and <strong>defense strength</strong> is calibrated from all goals scored and conceded. For each remaining match, the model computes the expected goals (<code>λ</code>) for each team, then uses the Poisson formula to build a full probability matrix of every possible scoreline (0–0 through 8–8). Win/draw/loss probabilities are derived from this matrix.<br><br>
-    <strong>10,000 simulations</strong> are run and aggregated. Results show <strong>title %</strong>, <strong>relegation %</strong> (9th/10th finish), points range, and most likely final position — all stable across page loads.
+    <strong>Poisson Distribution Model</strong> — attack &amp; defense strength ratings are calibrated from goals data, then used to build a full scoreline probability matrix (0–0 through 8–8) for each remaining match. <strong>10,000 simulations</strong> aggregated for stable results.<br><br>
+    <strong>Calibration mode</strong> controls which historical data is used to rate each team's strength:
+  </div>
+  <div style="display:flex;gap:0;margin-bottom:1.5rem;border:1px solid rgba(200,255,0,0.25);border-radius:4px;overflow:hidden;width:fit-content">
+    <button id="btn-all" onclick="switchMode('all')"
+      style="padding:0.6rem 1.4rem;font-family:'Bebas Neue',sans-serif;font-size:1rem;letter-spacing:0.08em;cursor:pointer;border:none;background:var(--accent);color:var(--pitch);transition:all 0.2s">
+      📊 Fall 2025 + Spring 2026
+    </button>
+    <button id="btn-spring" onclick="switchMode('spring')"
+      style="padding:0.6rem 1.4rem;font-family:'Bebas Neue',sans-serif;font-size:1rem;letter-spacing:0.08em;cursor:pointer;border:none;background:var(--card);color:var(--gray);transition:all 0.2s">
+      🌱 Spring 2026 Only
+    </button>
+  </div>
+  <div id="mode-note" style="font-size:0.82rem;color:var(--gray);margin-bottom:1.5rem;padding:0.6rem 1rem;background:rgba(200,255,0,0.04);border-left:3px solid var(--accent);border-radius:0 3px 3px 0">
+    Using <strong style="color:var(--white)">Fall 2025 + Spring 2026</strong> data to calibrate team strengths — most data, most reliable ratings.
   </div>
   <div id="loading"><div class="spinner"></div><span style="font-size:0.95rem;letter-spacing:0.1em">Running Poisson simulation (10,000 runs)...</span></div>
   <div id="pred-content" style="display:none">
@@ -172,14 +184,14 @@
   <div class="sec">Fall 2025 Results <span class="sb sb-f">14 weeks complete</span></div>
   <div id="fall-res"></div>
   <br>
-  <div class="sec">Spring 2026 Results <span class="sb sb-s">Weeks 1–9 played</span></div>
+  <div class="sec">Spring 2026 Results <span class="sb sb-s">Weeks 1–11 played</span></div>
   <div id="spring-res"></div>
 </div>
 
 <!-- REMAINING -->
 <div class="panel" id="panel-remaining">
-  <div class="note"><strong>20 matches remaining</strong> across Weeks 10–14 (Apr 26 – May 24, 2026).</div>
-  <div class="sec">Remaining Fixtures <span class="sb sb-p">Weeks 10–14</span></div>
+  <div class="note"><strong>10 matches remaining</strong> across Weeks 12–14 (May 10 – May 24, 2026).</div>
+  <div class="sec">Remaining Fixtures <span class="sb sb-p">Weeks 12–14</span></div>
   <div id="rem-list"></div>
 </div>
 
@@ -269,19 +281,21 @@ const SPRING=[
   {w:9,wl:'Week 9 — Apr 19',h:'Austin Athletic Club',a:'VTX United FC',hg:3,ag:1},
   {w:9,wl:'Week 9 — Apr 19',h:'ATX United - Gold',a:'TBD FC',hg:1,ag:3},
   {w:9,wl:'Week 9 — Apr 19',h:'ATX United - Red',a:'Lokomotiv Zilker',hg:0,ag:3},
+  // Week 10 — Apr 26
+  {w:10,wl:'Week 10 — Apr 26',h:'ATX United - Red',a:'ATX United - White',hg:4,ag:0},
+  {w:10,wl:'Week 10 — Apr 26',h:'Lokomotiv Zilker',a:'TBD FC',hg:3,ag:1},
+  {w:10,wl:'Week 10 — Apr 26',h:'Austin Athletic Club',a:'Caledonians',hg:0,ag:5},
+  {w:10,wl:'Week 10 — Apr 26',h:'ATX United - Gold',a:'VTX United FC',hg:2,ag:6},
+  {w:10,wl:'Week 10 — Apr 26',h:'Austin Thunder',a:'Merit FC',hg:2,ag:1},
+  // Week 11 — May 3
+  {w:11,wl:'Week 11 — May 3',h:'Austin Thunder',a:'Lokomotiv Zilker',hg:1,ag:3},
+  {w:11,wl:'Week 11 — May 3',h:'TBD FC',a:'VTX United FC',hg:4,ag:2},
+  {w:11,wl:'Week 11 — May 3',h:'ATX United - Gold',a:'Caledonians',hg:2,ag:4},
+  {w:11,wl:'Week 11 — May 3',h:'ATX United - White',a:'Austin Athletic Club',hg:1,ag:0},
+  {w:11,wl:'Week 11 — May 3',h:'ATX United - Red',a:'Merit FC',hg:4,ag:1},
 ];
 
 const REMAINING=[
-  {w:10,wl:'Week 10 — Apr 26',h:'ATX United - Red',a:'ATX United - White'},
-  {w:10,wl:'Week 10 — Apr 26',h:'Lokomotiv Zilker',a:'TBD FC'},
-  {w:10,wl:'Week 10 — Apr 26',h:'Austin Athletic Club',a:'Caledonians'},
-  {w:10,wl:'Week 10 — Apr 26',h:'ATX United - Gold',a:'VTX United FC'},
-  {w:10,wl:'Week 10 — Apr 26',h:'Austin Thunder',a:'Merit FC'},
-  {w:11,wl:'Week 11 — May 3',h:'Austin Thunder',a:'Lokomotiv Zilker'},
-  {w:11,wl:'Week 11 — May 3',h:'TBD FC',a:'VTX United FC'},
-  {w:11,wl:'Week 11 — May 3',h:'ATX United - Gold',a:'Caledonians'},
-  {w:11,wl:'Week 11 — May 3',h:'ATX United - White',a:'Austin Athletic Club'},
-  {w:11,wl:'Week 11 — May 3',h:'ATX United - Red',a:'Merit FC'},
   {w:12,wl:'Week 12 — May 10',h:'ATX United - White',a:'TBD FC'},
   {w:12,wl:'Week 12 — May 10',h:'Caledonians',a:'Merit FC'},
   {w:12,wl:'Week 12 — May 10',h:'ATX United - Red',a:'VTX United FC'},
@@ -393,57 +407,77 @@ const cs = blank();
 apply(cs, FALL);
 apply(cs, SPRING);
 const curSorted = sortedArr(cs);
-const ratings = calibratePoisson(cs);
 
-// ── SIMULATION ──────────────────────────────────────────────────────────────
+// ratings from ALL played data (Fall + Spring)
+const ratingsAll = calibratePoisson(cs);
+
+// ratings from Spring 2026 only
+const csSpring = blank();
+apply(csSpring, SPRING);
+const ratingsSpring = calibratePoisson(csSpring);
+
+// active mode: 'all' or 'spring'
+let simMode = 'all';
+
+// ── SIMULATION ENGINE ────────────────────────────────────────────────────────
 const RUNS = 10000;
-const agg = {};
-TEAMS.forEach(t => agg[t] = { posCount: Array(10).fill(0), ptsArr: [], titleCount:0, top3Count:0, relCount:0 });
 
-for (let r = 0; r < RUNS; r++) {
-  const s = blank();
-  TEAMS.forEach(t => { const c = cs[t]; s[t] = {...c, form:[...c.form]}; });
+function runSimulation(ratings) {
+  const agg = {};
+  TEAMS.forEach(t => agg[t] = { posCount: Array(10).fill(0), ptsArr: [], titleCount:0, top3Count:0, relCount:0 });
 
-  REMAINING.forEach(f => {
-    const probs = matchProbs(ratings, f.h, f.a);
-    const { hg, ag } = sampleScore(probs.lambdaH, probs.lambdaA);
-    const hm = s[f.h], aw = s[f.a];
-    hm.mp++; aw.mp++;
-    hm.gf += hg; hm.ga += ag; aw.gf += ag; aw.ga += hg;
-    if (hg > ag) { hm.w++; hm.pts+=3; aw.l++; }
-    else if (hg < ag) { aw.w++; aw.pts+=3; hm.l++; }
-    else { hm.d++; aw.d++; hm.pts++; aw.pts++; }
-  });
+  for (let r = 0; r < RUNS; r++) {
+    const s = blank();
+    TEAMS.forEach(t => { const c = cs[t]; s[t] = {...c, form:[...c.form]}; });
 
-  const ranked = sortedArr(s);
-  ranked.forEach((t, i) => {
-    agg[t.team].posCount[i]++;
-    agg[t.team].ptsArr.push(t.pts);
-    if (i === 0) agg[t.team].titleCount++;
-    if (i <= 2)  agg[t.team].top3Count++;
-    if (i >= 8)  agg[t.team].relCount++;
-  });
+    REMAINING.forEach(f => {
+      const probs = matchProbs(ratings, f.h, f.a);
+      const { hg, ag } = sampleScore(probs.lambdaH, probs.lambdaA);
+      const hm = s[f.h], aw = s[f.a];
+      hm.mp++; aw.mp++;
+      hm.gf += hg; hm.ga += ag; aw.gf += ag; aw.ga += hg;
+      if (hg > ag) { hm.w++; hm.pts+=3; aw.l++; }
+      else if (hg < ag) { aw.w++; aw.pts+=3; hm.l++; }
+      else { hm.d++; aw.d++; hm.pts++; aw.pts++; }
+    });
+
+    const ranked = sortedArr(s);
+    ranked.forEach((t, i) => {
+      agg[t.team].posCount[i]++;
+      agg[t.team].ptsArr.push(t.pts);
+      if (i === 0) agg[t.team].titleCount++;
+      if (i <= 2)  agg[t.team].top3Count++;
+      if (i >= 8)  agg[t.team].relCount++;
+    });
+  }
+
+  return TEAMS.map(t => {
+    const a = agg[t];
+    const pts = [...a.ptsArr].sort((x,y)=>x-y);
+    const median = pts[Math.floor(RUNS/2)];
+    const p10 = pts[Math.floor(RUNS*0.1)];
+    const p90 = pts[Math.floor(RUNS*0.9)];
+    const mlPos = a.posCount.indexOf(Math.max(...a.posCount)) + 1;
+    const mlPct = (Math.max(...a.posCount)/RUNS*100).toFixed(0);
+    return {
+      team:t, median, p10, p90, min:pts[0], max:pts[RUNS-1],
+      mlPos, mlPct,
+      titlePct: (a.titleCount/RUNS*100).toFixed(1),
+      top3Pct:  (a.top3Count/RUNS*100).toFixed(1),
+      relPct:   (a.relCount/RUNS*100).toFixed(1),
+      posCount: a.posCount,
+      ...cs[t]
+    };
+  }).sort((a,b) => b.median-a.median || parseFloat(b.titlePct)-parseFloat(a.titlePct));
 }
 
-// Compute final stats
-const teamStats = TEAMS.map(t => {
-  const a = agg[t];
-  const pts = [...a.ptsArr].sort((x,y)=>x-y);
-  const median = pts[Math.floor(RUNS/2)];
-  const p10 = pts[Math.floor(RUNS*0.1)];
-  const p90 = pts[Math.floor(RUNS*0.9)];
-  const mlPos = a.posCount.indexOf(Math.max(...a.posCount)) + 1;
-  const mlPct = (Math.max(...a.posCount)/RUNS*100).toFixed(0);
-  return {
-    team:t, median, p10, p90, min:pts[0], max:pts[RUNS-1],
-    mlPos, mlPct,
-    titlePct: (a.titleCount/RUNS*100).toFixed(1),
-    top3Pct:  (a.top3Count/RUNS*100).toFixed(1),
-    relPct:   (a.relCount/RUNS*100).toFixed(1),
-    posCount: a.posCount,
-    ...cs[t]
-  };
-}).sort((a,b) => b.median-a.median || parseFloat(b.titlePct)-parseFloat(a.titlePct));
+// run both simulations upfront
+const teamStatsAll    = runSimulation(ratingsAll);
+const teamStatsSpring = runSimulation(ratingsSpring);
+
+// active stats pointer
+let teamStats = teamStatsAll;
+let ratings   = ratingsAll;
 
 // ── RENDER FUNCTIONS ────────────────────────────────────────────────────────
 
@@ -707,6 +741,34 @@ function renderForm() {
       <div class="sr"><span>xG conceded per game</span><span class="sv">${(r.DEF*r.aA).toFixed(2)}</span></div>
     </div>`;
   }).join('');
+}
+
+function switchMode(mode) {
+  simMode = mode;
+  teamStats = mode === 'spring' ? teamStatsSpring : teamStatsAll;
+  ratings   = mode === 'spring' ? ratingsSpring   : ratingsAll;
+
+  // update toggle button styles
+  document.getElementById('btn-all').style.background    = mode === 'all'    ? 'var(--accent)' : 'var(--card)';
+  document.getElementById('btn-all').style.color         = mode === 'all'    ? 'var(--pitch)'  : 'var(--gray)';
+  document.getElementById('btn-spring').style.background = mode === 'spring' ? 'var(--accent)' : 'var(--card)';
+  document.getElementById('btn-spring').style.color      = mode === 'spring' ? 'var(--pitch)'  : 'var(--gray)';
+
+  // update mode note
+  const noteEl = document.getElementById('mode-note');
+  if (mode === 'spring') {
+    noteEl.style.borderLeftColor = 'var(--orange)';
+    noteEl.innerHTML = 'Using <strong style="color:var(--white)">Spring 2026 only</strong> data to calibrate team strengths — reflects current-season form, but fewer games means less stable ratings.';
+  } else {
+    noteEl.style.borderLeftColor = 'var(--accent)';
+    noteEl.innerHTML = 'Using <strong style="color:var(--white)">Fall 2025 + Spring 2026</strong> data to calibrate team strengths — most data, most reliable ratings.';
+  }
+
+  // re-render prediction content
+  renderPredTable();
+  renderPredCards();
+  renderStrengthTable();
+  renderRemaining();
 }
 
 function showTab(id,btn){
