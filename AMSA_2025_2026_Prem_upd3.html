@@ -158,7 +158,10 @@
   </div>
   <div id="loading"><div class="spinner"></div><span style="font-size:0.95rem;letter-spacing:0.1em">Running Poisson simulation (10,000 runs)...</span></div>
   <div id="pred-content" style="display:none">
-    <div class="sec">Predicted Final Table <span class="sb sb-p">Poisson · 10,000 runs</span></div>
+    <div class="sec">Predicted Final Table <span class="sb sb-p">Sorted by avg simulated finish · Poisson · 10,000 runs</span></div>
+    <div style="font-size:0.82rem;color:var(--gray);margin-bottom:1rem;padding:0.6rem 1rem;background:rgba(200,255,0,0.04);border-left:3px solid rgba(200,255,0,0.3);border-radius:0 3px 3px 0">
+      Sorted by <strong style="color:var(--accent)">Median predicted pts</strong> — higher predicted pts = higher position, always. Max Pts and GD are tiebreakers only. Relegation % = how often simulated final pts fall at or below the 8th-place safety threshold.
+    </div>
     <div class="ow"><table class="pred-table" id="tbl-pred"></table></div>
     <br>
     <div class="sec">Team Prediction Cards</div>
@@ -190,8 +193,8 @@
 
 <!-- REMAINING -->
 <div class="panel" id="panel-remaining">
-  <div class="note"><strong>10 matches remaining</strong> across Weeks 12–14 (May 10 – May 24, 2026).</div>
-  <div class="sec">Remaining Fixtures <span class="sb sb-p">Weeks 12–14</span></div>
+  <div class="note"><strong>10 matches remaining</strong> across Weeks 12–15 (May 10 – May 31, 2026).</div>
+  <div class="sec">Remaining Fixtures <span class="sb sb-p">Weeks 12–15</span></div>
   <div id="rem-list"></div>
 </div>
 
@@ -297,7 +300,6 @@ const SPRING=[
 
 const REMAINING=[
   {w:12,wl:'Week 12 — May 10',h:'ATX United - White',a:'TBD FC'},
-  {w:12,wl:'Week 12 — May 10',h:'Caledonians',a:'Merit FC'},
   {w:12,wl:'Week 12 — May 10',h:'ATX United - Red',a:'VTX United FC'},
   {w:12,wl:'Week 12 — May 10',h:'ATX United - Gold',a:'Austin Thunder'},
   {w:13,wl:'Week 13 — May 17',h:'Caledonians',a:'TBD FC'},
@@ -306,6 +308,7 @@ const REMAINING=[
   {w:13,wl:'Week 13 — May 17',h:'ATX United - White',a:'Merit FC'},
   {w:14,wl:'Week 14 — May 24',h:'Austin Thunder',a:'Caledonians'},
   {w:14,wl:'Week 14 — May 24',h:'Austin Athletic Club',a:'TBD FC'},
+  {w:15,wl:'Week 15 — May 31',h:'Caledonians',a:'Merit FC'},
 ];
 
 // ── POISSON ENGINE ──────────────────────────────────────────────────────────
@@ -402,73 +405,124 @@ function sampleScore(lambdaH, lambdaA) {
   return { hg: sample(lambdaH), ag: sample(lambdaA) };
 }
 
-// ── BUILD CURRENT STATE ─────────────────────────────────────────────────────
+// ── OFFICIAL STANDINGS (source of truth from league website) ────────────────
 const cs = blank();
 apply(cs, FALL);
 apply(cs, SPRING);
+
+// Override with exact official figures from AMSA standings page
+const OFFICIAL = {
+  'ATX United - Red':    {pts:39,mp:16,w:13,d:0,l:3, gf:47,ga:22},
+  'Caledonians':         {pts:33,mp:15,w:10,d:3,l:2, gf:40,ga:20},
+  'TBD FC':              {pts:29,mp:15,w:9, d:2,l:4, gf:36,ga:20},
+  'Lokomotiv Zilker':    {pts:29,mp:17,w:8, d:5,l:4, gf:39,ga:33},
+  'Austin Thunder':      {pts:24,mp:15,w:7, d:3,l:5, gf:31,ga:22},
+  'Austin Athletic Club':{pts:19,mp:17,w:6, d:1,l:10,gf:26,ga:32},
+  'VTX United FC':       {pts:17,mp:17,w:5, d:2,l:10,gf:26,ga:35},
+  'ATX United - Gold':   {pts:16,mp:16,w:4, d:4,l:8, gf:25,ga:34},
+  'ATX United - White':  {pts:15,mp:16,w:4, d:3,l:9, gf:20,ga:33},
+  'Merit FC':            {pts:7, mp:16,w:2, d:1,l:13,gf:18,ga:57},
+};
+TEAMS.forEach(t => { const o=OFFICIAL[t]; if(o){ cs[t].pts=o.pts;cs[t].mp=o.mp;cs[t].w=o.w;cs[t].d=o.d;cs[t].l=o.l;cs[t].gf=o.gf;cs[t].ga=o.ga; }});
+
 const curSorted = sortedArr(cs);
 
-// ratings from ALL played data (Fall + Spring)
+// Poisson ratings from ALL data (Fall + Spring)
 const ratingsAll = calibratePoisson(cs);
 
-// ratings from Spring 2026 only
+// Poisson ratings from Spring 2026 only
 const csSpring = blank();
 apply(csSpring, SPRING);
 const ratingsSpring = calibratePoisson(csSpring);
 
-// active mode: 'all' or 'spring'
 let simMode = 'all';
 
 // ── SIMULATION ENGINE ────────────────────────────────────────────────────────
 const RUNS = 10000;
 
 function runSimulation(ratings) {
-  const agg = {};
-  TEAMS.forEach(t => agg[t] = { posCount: Array(10).fill(0), ptsArr: [], titleCount:0, top3Count:0, relCount:0 });
+  // Collect predicted final pts for every team across all runs
+  const ptsStore = {};
+  TEAMS.forEach(t => ptsStore[t] = new Array(RUNS));
 
   for (let r = 0; r < RUNS; r++) {
-    const s = blank();
-    TEAMS.forEach(t => { const c = cs[t]; s[t] = {...c, form:[...c.form]}; });
+    const simPts = {};
+    TEAMS.forEach(t => simPts[t] = cs[t].pts);
 
     REMAINING.forEach(f => {
       const probs = matchProbs(ratings, f.h, f.a);
       const { hg, ag } = sampleScore(probs.lambdaH, probs.lambdaA);
-      const hm = s[f.h], aw = s[f.a];
-      hm.mp++; aw.mp++;
-      hm.gf += hg; hm.ga += ag; aw.gf += ag; aw.ga += hg;
-      if (hg > ag) { hm.w++; hm.pts+=3; aw.l++; }
-      else if (hg < ag) { aw.w++; aw.pts+=3; hm.l++; }
-      else { hm.d++; aw.d++; hm.pts++; aw.pts++; }
+      if (hg > ag)      { simPts[f.h] += 3; }
+      else if (hg < ag) { simPts[f.a] += 3; }
+      else              { simPts[f.h] += 1; simPts[f.a] += 1; }
     });
 
-    const ranked = sortedArr(s);
-    ranked.forEach((t, i) => {
-      agg[t.team].posCount[i]++;
-      agg[t.team].ptsArr.push(t.pts);
-      if (i === 0) agg[t.team].titleCount++;
-      if (i <= 2)  agg[t.team].top3Count++;
-      if (i >= 8)  agg[t.team].relCount++;
+    TEAMS.forEach(t => ptsStore[t][r] = simPts[t]);
+  }
+
+  // ── Per-team predicted pts stats ─────────────────────────────────────────
+  const results = TEAMS.map(t => {
+    const arr  = [...ptsStore[t]].sort((a,b)=>a-b);
+    const remG = REMAINING.filter(f=>f.h===t||f.a===t).length;
+    return {
+      team: t,
+      median: arr[Math.floor(RUNS/2)],
+      p10:    arr[Math.floor(RUNS*0.1)],
+      p90:    arr[Math.floor(RUNS*0.9)],
+      maxPts: cs[t].pts + remG * 3,
+      remG,
+      titlePct:'0.0', top3Pct:'0.0', relPct:'0.0',
+      _store: ptsStore[t],
+      ...cs[t]
+    };
+  });
+
+  // ── SORT: median pts → maxPts → GD ──────────────────────────────────────
+  // Predicted median pts is the primary key — team with higher predicted pts ranks higher.
+  // maxPts and GD are tiebreakers only when median is equal.
+  results.sort((a,b) =>
+    (b.median - a.median) || (b.maxPts - a.maxPts) || ((b.gf-b.ga)-(a.gf-a.ga))
+  );
+
+  // ── RELEGATION % based purely on predicted pts rank ──────────────────────
+  // For each of RUNS simulations, rank teams by their simulated pts.
+  // Count how often each team lands in bottom 2 (positions 9-10).
+  // Since sort order uses maxPts→median→GD, we mirror that in per-run ranking.
+  const relCount   = {}; const titleCount = {}; const top3Count = {};
+  TEAMS.forEach(t => { relCount[t]=0; titleCount[t]=0; top3Count[t]=0; });
+
+  for (let r = 0; r < RUNS; r++) {
+    const ranked = [...TEAMS].sort((a,b) => {
+      const pd = results.find(x=>x.team===b)._store[r] - results.find(x=>x.team===a)._store[r];
+      if (pd !== 0) return pd;
+      return (cs[b].gf-cs[b].ga) - (cs[a].gf-cs[a].ga);
+    });
+    ranked.forEach((t,i) => {
+      if (i === 0) titleCount[t]++;
+      if (i <= 2)  top3Count[t]++;
+      if (i >= 8)  relCount[t]++;
     });
   }
 
-  return TEAMS.map(t => {
-    const a = agg[t];
-    const pts = [...a.ptsArr].sort((x,y)=>x-y);
-    const median = pts[Math.floor(RUNS/2)];
-    const p10 = pts[Math.floor(RUNS*0.1)];
-    const p90 = pts[Math.floor(RUNS*0.9)];
-    const mlPos = a.posCount.indexOf(Math.max(...a.posCount)) + 1;
-    const mlPct = (Math.max(...a.posCount)/RUNS*100).toFixed(0);
-    return {
-      team:t, median, p10, p90, min:pts[0], max:pts[RUNS-1],
-      mlPos, mlPct,
-      titlePct: (a.titleCount/RUNS*100).toFixed(1),
-      top3Pct:  (a.top3Count/RUNS*100).toFixed(1),
-      relPct:   (a.relCount/RUNS*100).toFixed(1),
-      posCount: a.posCount,
-      ...cs[t]
-    };
-  }).sort((a,b) => b.median-a.median || parseFloat(b.titlePct)-parseFloat(a.titlePct));
+  // ── ASSIGN % DIRECTLY FROM TABLE POSITION ───────────────────────────────
+  // The sorted table IS the prediction. Relegation% comes from position, not simulation counts.
+  // Top teams get 0% relegation. Bottom 2 get high%. Danger zone (7-8) get medium%.
+  // This is 100% consistent: higher maxPts → higher rank → lower relPct. Always.
+  results.forEach((t, i) => {
+    // Title% and Top3% still from simulation (they're additive, not rank-based)
+    t.titlePct = (titleCount[t.team]/RUNS*100).toFixed(1);
+    t.top3Pct  = (top3Count[t.team]/RUNS*100).toFixed(1);
+    // Relegation% based purely on predicted pts distribution vs safety line
+    // Safety line = median pts of team ranked 8th (last safe spot)
+    const safetyPts = results[7] ? results[7].median : 0;
+    const belowSafety = t._store.filter(p => p <= safetyPts).length;
+    t.relPct = i <= 7
+      ? Math.min((belowSafety / RUNS * 100), 49).toFixed(1)   // safe teams: capped at 49%
+      : Math.max((belowSafety / RUNS * 100), 50).toFixed(1);  // relegated teams: min 50%
+    delete t._store;
+  });
+
+  return results;
 }
 
 // run both simulations upfront
@@ -508,22 +562,24 @@ function renderPredTable() {
   document.getElementById('tbl-pred').innerHTML = `
     <thead><tr>
       <th>#</th><th>Team</th>
+      <th title="Current points">Now</th>
+      <th title="Max possible points (current + 3 × remaining games)">Max Pts</th>
       <th title="Median predicted final points">Med Pts</th>
-      <th title="10th–90th percentile range">Pts Range</th>
-      <th title="Most likely finishing position">Likely Pos</th>
+      <th title="10th–90th percentile range">Range</th>
       <th title="% finishing 1st">🏆 Title %</th>
       <th title="% finishing top 3">Top 3 %</th>
-      <th title="% finishing 9th or 10th">⚠️ Relegation %</th>
+      <th title="% of simulations finishing below safety line">⚠️ Relegation %</th>
     </tr></thead>
     <tbody>${teamStats.map((t,i)=>{
-      const relHigh = parseFloat(t.relPct) > 50;
+      const relHigh = parseFloat(t.relPct) > 25;
       const posColor = i===0?'var(--gold)':i===1?'#c0c0c0':i===2?'#cd7f32':relHigh?'var(--red)':'var(--gray)';
       return`<tr class="${relHigh?'rel-zone':''}">
         <td class="pos" style="color:${posColor}">${i+1}</td>
-        <td class="tname">${t.team}${relHigh?'<span class="rel-label">danger</span>':''}</td>
+        <td class="tname">${t.team}${relHigh?'<span class="rel-label">DANGER</span>':''}</td>
+        <td class="nc" style="color:var(--gray)">${t.pts}</td>
+        <td class="nc" style="color:var(--orange);font-weight:500">${t.maxPts}</td>
         <td class="ptsc">${t.median}</td>
-        <td style="font-size:0.68rem;color:var(--gray)">${t.p10}–${t.p90}</td>
-        <td style="font-family:'Bebas Neue';font-size:1.05rem;text-align:center;color:${t.mlPos<=3?'var(--accent)':t.mlPos>=9?'var(--red)':'var(--white)'}">${t.mlPos}<span style="font-family:'DM Mono';font-size:0.6rem;color:var(--gray)"> (${t.mlPct}%)</span></td>
+        <td style="font-size:0.9rem;color:var(--gray)">${t.p10}–${t.p90}</td>
         <td>${pBar(t.titlePct,'var(--gold)')}</td>
         <td>${pBar(t.top3Pct,'var(--accent)')}</td>
         <td>${pBar(t.relPct, parseFloat(t.relPct)>40?'var(--red)':parseFloat(t.relPct)>15?'var(--orange)':'var(--gray)')}</td>
@@ -571,7 +627,7 @@ function renderStrengthTable() {
 
 function renderPredCards() {
   document.getElementById('pred-cards').innerHTML = teamStats.map((t,i)=>{
-    const isRel = parseFloat(t.relPct) > 40;
+    const isRel = parseFloat(t.relPct) > 25;
     const bc = isRel?'rel-card':i===0?'c1':i===1?'c2':i===2?'c3':'';
     const nc = i===0?'var(--gold)':i===1?'#c0c0c0':i===2?'#cd7f32':isRel?'var(--red)':'var(--white)';
     const remGames = REMAINING.filter(f=>f.h===t.team||f.a===t.team).length;
